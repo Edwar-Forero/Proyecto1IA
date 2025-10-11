@@ -1,19 +1,17 @@
----
 
 ## 👥 Integrantes del Grupo
 
 | Nombre Completo       | Código  | Rol            | Correo Electrónico       |
 |-----------------------|---------|----------------|--------------------------|
-| Edwar Yamir Forero Blanci        | 2559741  | Colab | [edwar.forero@univalle.edu.co]|
-| [Estudiante 2]        | 123457  | [Colaborador]  | [correo2@institucion.edu]|
-| [Estudiante 3]        | 123458  | [Colaborador]  | [correo3@institucion.edu]|
-| [Estudiante 4]        | 123459  | [Colaborador]  | [correo4@institucion.edu]|
+| Edwar Yamir Forero Blanco        | 2559741  | Colaborador | edwar.forero@correounivalle.edu.co|
+| Faber Alexis Solis Gamboa        | 123457  | [Colaborador]  | [correo2@institucion.edu]|
+| Jhojan Serna Henao        | 123458  | [Colaborador]  | [correo3@institucion.edu]|
+| Kevin Hinojosa Osorio        | 123459  | [Colaborador]  | [correo4@institucion.edu]|
+
+
+
 
 ---
-
-
-
-
 ![Mapa de ejemplo](assets/image.png)
 
 

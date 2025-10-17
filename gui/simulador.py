@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import scrolledtext, messagebox
 from core.algoritmo_beam import beam_search
+from core.algoritmo_dynamic import dynamic_weight_a_star
 
 
 class Simulador(tk.Tk):
@@ -53,6 +54,14 @@ class Simulador(tk.Tk):
                 self.text_area.insert(tk.END, f"Ruta calculada con éxito. Total pasos: {len(self.ruta)}\n\n")
             else:
                 messagebox.showinfo("Sin resultado", "No se encontró camino con Beam Search.")
+        
+        elif algoritmo == "dynamic":
+            resultado = dynamic_weight_a_star(entorno)
+            if resultado[0]:
+                self.ruta, self.pasos = resultado
+                self.text_area.insert(tk.END, f"Ruta calculada con éxito. Total pasos: {len(self.ruta)}\n\n")
+            else:
+                messagebox.showinfo("Sin resultado", "No se encontró camino con Dynamic Weight A*.")
         else:
             messagebox.showinfo("Aviso", f"Algoritmo {algoritmo} aún no implementado.")
 

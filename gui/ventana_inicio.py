@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from gui.editor_mapa import EditorMapa
-from utils.helpers import centrar_ventana
+""" from utils.helpers import centrar_ventana """
 
 
 class VentanaInicio(tk.Tk):
@@ -12,8 +12,8 @@ class VentanaInicio(tk.Tk):
         self.geometry("400x300")
         self.resizable(False, False)
         self.configure(bg="#f0f0f0")
-        ancho, alto = 400, 300
-        centrar_ventana(self, ancho, alto)
+        """ ancho, alto = 400, 300
+        centrar_ventana(self, ancho, alto) """
 
         # --- Título principal ---
         titulo = tk.Label(

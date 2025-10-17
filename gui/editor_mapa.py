@@ -11,17 +11,16 @@ class EditorMapa(tk.Tk):
         self.title("Editor del Mapa 🐜🍄")
         self.configure(bg="#f0f0f0")
         self.resizable(False, False)
-        
 
         self.filas = filas
         self.columnas = columnas
-        self.celda_size = 40  # tamaño de cada cuadrado
-        self.modo = tk.StringVar(value="hormiga")  # modo actual de colocación
+        self.celda_size = 40
+        self.modo = tk.StringVar(value="hormiga")
 
         # --- Crear entorno ---
         self.entorno = Entorno(filas, columnas)
 
-        # --- Canvas para la cuadrícula ---
+        # --- Canvas principal ---
         self.canvas = tk.Canvas(
             self,
             width=self.columnas * self.celda_size,
@@ -30,16 +29,15 @@ class EditorMapa(tk.Tk):
         )
         self.canvas.pack(padx=10, pady=10)
         self.dibujar_cuadricula()
-
-        # Detectar clics en el canvas
         self.canvas.bind("<Button-1>", self.colocar_elemento)
 
         # --- Controles laterales ---
         frame_controles = tk.Frame(self, bg="#f0f0f0")
         frame_controles.pack(pady=10)
 
-        # Botones para elegir modo
-        tk.Label(frame_controles, text="Modo de colocación:", bg="#f0f0f0", font=("Arial", 10, "bold")).grid(row=0, column=0, columnspan=3, pady=5)
+        tk.Label(frame_controles, text="Modo de colocación:", bg="#f0f0f0", font=("Arial", 10, "bold")).grid(
+            row=0, column=0, columnspan=4, pady=5
+        )
 
         modos = [
             ("Hormiga 🐜", "hormiga"),
@@ -47,7 +45,6 @@ class EditorMapa(tk.Tk):
             ("Veneno ☠️", "veneno"),
             ("Borrar ❌", "borrar")
         ]
-
         for i, (texto, valor) in enumerate(modos):
             tk.Radiobutton(
                 frame_controles,
@@ -57,15 +54,31 @@ class EditorMapa(tk.Tk):
                 bg="#f0f0f0"
             ).grid(row=1, column=i, padx=5)
 
-        # --- Botón para iniciar búsqueda ---
+        # --- Botones de algoritmo ---
+        frame_beam = tk.Frame(frame_controles, bg="#f0f0f0")
+        frame_beam.grid(row=3, column=0, columnspan=2, padx=10, pady=5)
+
         tk.Button(
-            self,
-            text="Iniciar búsqueda ▶️",
+            frame_beam,
+            text="Usar Beam Search 🔍",
             bg="#4CAF50",
             fg="white",
-            font=("Arial", 12, "bold"),
-            command=self.iniciar_busqueda
-        ).pack(pady=15)
+            font=("Arial", 11, "bold"),
+            command=lambda: self.iniciar_busqueda("beam")
+        ).pack(side=tk.LEFT, padx=(0, 5))
+
+        tk.Label(frame_beam, text="β:", bg="#f0f0f0").pack(side=tk.LEFT)
+        self.entry_filas = tk.Entry(frame_beam, width=5, justify="center")
+        self.entry_filas.pack(side=tk.LEFT, padx=(0, 5))
+
+        tk.Button(
+            frame_controles,
+            text="Usar Dynamic Weighted A* ⚖️",
+            bg="#2196F3",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=lambda: self.iniciar_busqueda("dynamic")
+        ).grid(row=3, column=2, columnspan=2, padx=10, pady=5)
 
     # -----------------------------
     # Dibuja la cuadrícula vacía
@@ -86,19 +99,20 @@ class EditorMapa(tk.Tk):
         fila = event.y // self.celda_size
         col = event.x // self.celda_size
 
-        if self.modo.get() == "hormiga":
+        modo = self.modo.get()
+        if modo == "hormiga":
             self.entorno.colocar_hormiga((fila, col))
-        elif self.modo.get() == "meta":
+        elif modo == "meta":
             self.entorno.colocar_meta((fila, col))
-        elif self.modo.get() == "veneno":
+        elif modo == "veneno":
             self.entorno.colocar_veneno((fila, col))
-        elif self.modo.get() == "borrar":
+        elif modo == "borrar":
             self.entorno.borrar_elemento((fila, col))
 
         self.actualizar_canvas()
 
     # -----------------------------
-    # Redibuja el mapa con colores
+    # Redibuja el mapa
     # -----------------------------
     def actualizar_canvas(self):
         for i in range(self.filas):
@@ -112,7 +126,7 @@ class EditorMapa(tk.Tk):
 
                 if celda == "H":  # Hormiga
                     color = "orange"
-                elif celda == "M":  # Meta (hongo)
+                elif celda == "M":  # Meta
                     color = "green"
                 elif celda == "V":  # Veneno
                     color = "red"
@@ -124,11 +138,11 @@ class EditorMapa(tk.Tk):
     # -----------------------------
     # Abre la ventana de simulación
     # -----------------------------
-    def iniciar_busqueda(self):
+    def iniciar_busqueda(self, algoritmo):
         if not self.entorno.pos_hormiga or not self.entorno.pos_meta:
             messagebox.showwarning("Faltan elementos", "Debes colocar la hormiga y el hongo antes de continuar.")
             return
 
         self.destroy()
-        simulador = Simulador(self.entorno)
+        simulador = Simulador(self.entorno, algoritmo)
         simulador.mainloop()

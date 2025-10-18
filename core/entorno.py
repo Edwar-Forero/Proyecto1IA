@@ -30,3 +30,19 @@ class Entorno:
             self.matriz[pos[0]][pos[1]] = " "
             if pos in self.venenos:
                 self.venenos.remove(pos)
+
+    def obtenerMatrizCostos(self, costo_normal=1, costo_veneno=3, costo_meta=1):
+        costos = [[costo_normal for _ in range(self.columnas)] for _ in range(self.filas)]
+        for i in range(self.filas):
+            for j in range(self.columnas):
+                val = self.matriz[i][j]
+                if val == "V":
+                    costos[i][j] = costo_veneno
+                elif val == "M":
+                    costos[i][j] = costo_meta
+                elif val == "H":
+                    # Dejar la hormiga como costo normal (su posición no impide el paso)
+                    costos[i][j] = costo_normal
+                else:
+                    costos[i][j] = costo_normal
+        return costos

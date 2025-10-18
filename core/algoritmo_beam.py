@@ -5,17 +5,17 @@ from core.entorno import Entorno
 
 def heuristica_manhattan(a, b):
     """Calcula la distancia Manhattan entre dos puntos."""
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    distancia = abs(a[0] - b[0]) + abs(a[1] - b[1])
+    return distancia
 
 
-def beam_search(entorno: Entorno, beta: int):
+def beam_search(entorno: Entorno, beta: int, matrizCostos=None):
     """
     Ejecuta Beam Search sobre el entorno actual.
     Retorna el camino y una lista de pasos (para animación paso a paso).
     """
     mapa = entorno.matriz
     filas, columnas = len(mapa), len(mapa[0])
-
     inicio = entorno.pos_hormiga
     meta = entorno.pos_meta
 
@@ -24,8 +24,15 @@ def beam_search(entorno: Entorno, beta: int):
 
     frontera = [(heuristica_manhattan(inicio, meta), [inicio])]
     visitados = set()
-    pasos = []  # para registrar decisiones paso a paso
+    pasos = []
 
+    def es_valido(x, y, camino_actual):
+        # Verificamos que la posición sea válida y que no esté en el camino actual
+        valido = (0 <= x < filas and 0 <= y < columnas and 
+                 (x, y) not in camino_actual)
+        return valido
+
+    iteracion = 1
     while frontera:
         frontera = sorted(frontera, key=lambda x: x[0])[:beta]
         nueva_frontera = []
@@ -33,16 +40,12 @@ def beam_search(entorno: Entorno, beta: int):
         for _, camino in frontera:
             actual = camino[-1]
 
-            if actual == meta:
-                pasos.append({
-                    "pos": actual,
-                    "accion": "Meta alcanzada 🎯",
-                    "frontera": frontera.copy()
-                })
+            if heuristica_manhattan(actual, meta) == 0:
                 return camino, pasos
 
             if actual in visitados:
                 continue
+                
             visitados.add(actual)
 
             vecinos = [
@@ -52,16 +55,22 @@ def beam_search(entorno: Entorno, beta: int):
                 (actual[0], actual[1] + 1)   # derecha
             ]
 
-            # Analizar cada vecino
             decisiones = []
+            camino_actual = set(camino)  # Convertimos el camino a set para búsqueda O(1)
+            
             for nx, ny in vecinos:
-                if 0 <= nx < filas and 0 <= ny < columnas:
-                    if mapa[nx][ny] != "V":  # evitar veneno
-                        nuevo_camino = list(camino)
-                        nuevo_camino.append((nx, ny))
-                        h = heuristica_manhattan((nx, ny), meta)
-                        heappush(nueva_frontera, (h, nuevo_camino))
-                        decisiones.append(((nx, ny), h))
+                if not es_valido(nx, ny, camino_actual):
+                    continue
+                    
+                costo_mov = 1
+                if matrizCostos:
+                    costo_mov = matrizCostos[nx][ny]
+                
+                nuevo_camino = list(camino)
+                nuevo_camino.append((nx, ny))
+                h = heuristica_manhattan((nx, ny), meta) + costo_mov
+                heappush(nueva_frontera, (h, nuevo_camino))
+                decisiones.append(((nx, ny), h))
 
             pasos.append({
                 "pos": actual,
@@ -70,7 +79,7 @@ def beam_search(entorno: Entorno, beta: int):
                 "frontera": frontera.copy()
             })
 
-        # Seleccionar los β más prometedores
         frontera = [heappop(nueva_frontera) for _ in range(min(beta, len(nueva_frontera)))]
+        iteracion += 1
 
     return None, pasos

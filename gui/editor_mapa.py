@@ -142,7 +142,21 @@ class EditorMapa(tk.Tk):
         if not self.entorno.pos_hormiga or not self.entorno.pos_meta:
             messagebox.showwarning("Faltan elementos", "Debes colocar la hormiga y el hongo antes de continuar.")
             return
-
+        
+        matrizCostos = self.entorno.obtenerMatrizCostos()
+        beta = None
+        
+        # Get beta value for beam search
+        if algoritmo == "beam":
+            try:
+                beta = int(self.entry_filas.get())
+                if beta <= 0:
+                    messagebox.showwarning("Error", "El valor de β debe ser mayor que 0")
+                    return
+            except ValueError:
+                messagebox.showwarning("Error", "Por favor ingrese un valor válido para β")
+                return
+        
         self.destroy()
-        simulador = Simulador(self.entorno, algoritmo)
+        simulador = Simulador(self.entorno, algoritmo, matrizCostos, beta)
         simulador.mainloop()

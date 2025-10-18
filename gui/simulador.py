@@ -5,11 +5,13 @@ from core.algoritmo_dynamic import dynamic_weight_a_star
 
 
 class Simulador(tk.Tk):
-    def __init__(self, entorno, algoritmo):
+    def __init__(self, entorno, algoritmo, matrizCostos=None, beta=None):
         super().__init__()
 
         self.entorno = entorno
         self.algoritmo = algoritmo
+        self.matrizCostos = matrizCostos
+        self.beta = beta
         self.title(f"Simulador - {algoritmo.upper()}")
         self.geometry("1000x700")
         self.configure(bg="#f9f9f9")
@@ -47,8 +49,7 @@ class Simulador(tk.Tk):
         self.paso_actual = 0
 
         if algoritmo == "beam":
-            beta = 2  # podrías obtenerlo desde el editor si lo guardas
-            resultado = beam_search(entorno, beta)
+            resultado = beam_search(entorno, self.beta, self.matrizCostos)
             if resultado[0]:
                 self.ruta, self.pasos = resultado
                 self.text_area.insert(tk.END, f"Ruta calculada con éxito. Total pasos: {len(self.ruta)}\n\n")
@@ -79,11 +80,11 @@ class Simulador(tk.Tk):
                 valor = self.entorno.matriz[i][j]
 
                 color = "white"
-                if valor == "H":  # Meta
+                if valor == "H" and self.paso_actual > 0:  # Hormiga
                     color = "orange"
                 elif valor == "V":  # Veneno
                     color = "red"
-                elif valor == "M":  # Hormiga (si la tienes así)
+                elif valor == "M":  # Meta
                     color = "green"
 
                 self.canvas.create_rectangle(x1, y1, x2, y2, outline="gray", fill=color)
@@ -100,23 +101,36 @@ class Simulador(tk.Tk):
     # -----------------------------
     def siguiente_paso(self):
         if not self.ruta:
-            self.text_area.insert(tk.END, "No hay ruta calculada.\n")
+            self.text_area.insert(tk.END, "No hay ruta para mostrar.\n")
             return
 
         if self.paso_actual < len(self.ruta):
-            fila, col = self.ruta[self.paso_actual]
-            self.text_area.insert(tk.END, f"Paso {self.paso_actual + 1}: Hormiga en {fila, col}\n")
-
-            # Mostrar detalles si existen
+            pos_actual = self.ruta[self.paso_actual]
+            
+            # Obtener información del paso actual
             if self.paso_actual < len(self.pasos):
-                info = self.pasos[self.paso_actual]
-                if "decisiones" in info:
-                    self.text_area.insert(tk.END, f"  Decisiones desde {info['pos']}: {info['decisiones']}\n")
+                paso_info = self.pasos[self.paso_actual]
+                
+                # Mostrar información detallada
+                self.text_area.insert(tk.END, f"\n=== Paso {self.paso_actual + 1} ===\n")
+                self.text_area.insert(tk.END, f" Posición actual: {paso_info['pos']}\n")
+                
+                if 'decisiones' in paso_info:
+                    self.text_area.insert(tk.END, "\n Nodos explorados:\n")
+                    for decision in paso_info['decisiones']:
+                        pos, costo = decision
+                        self.text_area.insert(tk.END, f"  → {pos} (costo total: {costo})\n")
+                
+                if 'frontera' in paso_info:
+                    self.text_area.insert(tk.END, "\n Frontera antes del corte:\n")
+                    for nodo in paso_info['frontera']:
+                        self.text_area.insert(tk.END, f"  • Costo: {nodo[0]}, Camino: {nodo[1]}\n")
 
             self.paso_actual += 1
             self.dibujar_mapa()
+            self.text_area.see(tk.END)  # Auto-scroll
         else:
-            self.text_area.insert(tk.END, "Fin del recorrido.\n")
+            self.text_area.insert(tk.END, "\n ¡Ruta completada!\n")
 
     # -----------------------------
     # Resolver todo el camino de una vez
@@ -130,6 +144,6 @@ class Simulador(tk.Tk):
         for i, (fila, col) in enumerate(self.ruta):
             self.text_area.insert(tk.END, f"Paso {i + 1}: {fila, col}\n")
 
-        self.text_area.insert(tk.END, "✅ Ruta completa mostrada.\n")
+        self.text_area.insert(tk.END, " Ruta completa mostrada.\n")
         self.paso_actual = len(self.ruta) - 1
         self.dibujar_mapa()

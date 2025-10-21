@@ -55,10 +55,10 @@ def dynamic_weight_a_star(entorno: Entorno, epsilon: float = 1.5):
 
         # Vecinos en las 4 direcciones
         vecinos = [
-            (actual[0] - 1, actual[1]),
-            (actual[0] + 1, actual[1]),
-            (actual[0], actual[1] - 1),
-            (actual[0], actual[1] + 1)
+            (actual[0] - 1, actual[1]),  # arriba
+            (actual[0] + 1, actual[1]),  # abajo
+            (actual[0],     actual[1] - 1),  # izquierda
+            (actual[0],     actual[1] + 1)   # derecha
         ]
 
         for nx, ny in vecinos:
@@ -66,7 +66,7 @@ def dynamic_weight_a_star(entorno: Entorno, epsilon: float = 1.5):
                 celda = mapa[nx][ny]
 
                 # --- Determinar costo del terreno ---
-                # P = pasto o camino normal → costo 1
+                # P = camino normal → costo 1
                 # V = veneno → costo alto (p.ej. 5)
                 # H = hongo (meta) → costo 1
                 # M = hormiga → costo 1
@@ -75,7 +75,7 @@ def dynamic_weight_a_star(entorno: Entorno, epsilon: float = 1.5):
                 else:
                     costo = 1
 
-                vecino = (nx, ny)
+                vecino = (nx, ny) 
                 g_nuevo = g_cost[actual] + costo
                 h_nuevo = heuristica_manhattan(vecino, meta)
                 d = profundidad + 1

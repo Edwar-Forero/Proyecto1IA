@@ -28,41 +28,55 @@ class Simulador(tk.Tk):
         # --- Panel derecho ---
         frame_derecho = tk.Frame(self, bg="#ececec")
         frame_derecho.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10, pady=10)
-
-        tk.Button(frame_derecho, text="Siguiente paso", bg="#4CAF50", fg="white",
-                  font=("Arial", 12, "bold"), command=self.siguiente_paso).pack(pady=10, fill=tk.X)
-        tk.Button(frame_derecho, text="Resolver todo", bg="#2196F3", fg="white",
-                  font=("Arial", 12, "bold"), command=self.resolver_todo).pack(pady=10, fill=tk.X)
-
-        tk.Label(frame_derecho, text="Registro de decisiones:",
+        
+        if algoritmo == "dynamic":
+            tk.Button(frame_derecho, text="Siguiente paso", bg="#4CAF50", fg="white",
+                    font=("Arial", 12, "bold"), command=self.siguiente_pasoD).pack(pady=10, fill=tk.X)
+            tk.Button(frame_derecho, text="Resolver todo", bg="#2196F3", fg="white",
+                    font=("Arial", 12, "bold"), command=self.resolver_todoD).pack(pady=10, fill=tk.X)
+            tk.Label(frame_derecho, text="Registro de decisiones:",
                  bg="#ececec", font=("Arial", 12, "bold")).pack(pady=10)
-        self.text_area = scrolledtext.ScrolledText(frame_derecho, width=60, height=35, wrap=tk.WORD,
-                                                    font=("Courier", 9))
-        self.text_area.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
+            self.text_area = scrolledtext.ScrolledText(frame_derecho, width=60, height=35, wrap=tk.WORD,
+                                                        font=("Courier", 9))
+            self.text_area.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
 
-        # --- Información inicial ---
-        self.text_area.insert(tk.END, "="*60 + "\n")
-        self.text_area.insert(tk.END, "INICIO DE BEAM SEARCH\n")
-        self.text_area.insert(tk.END, "="*60 + "\n")
-        self.text_area.insert(tk.END, f"Algoritmo seleccionado: {algoritmo.upper()}\n")
-        self.text_area.insert(tk.END, f"Posición inicial: {entorno.pos_hormiga}\n")
-        self.text_area.insert(tk.END, f"Posición meta: {entorno.pos_meta}\n")
-        if self.beta:
-            self.text_area.insert(tk.END, f"Beta (ancho de haz): {self.beta}\n")
-        self.text_area.insert(tk.END, f"Tamaño del mapa: {entorno.filas}x{entorno.columnas}\n")
-        self.text_area.insert(tk.END, f"Usando matriz de costos: {'Sí' if matrizCostos else 'No'}\n")
         
-        # Calcular valores iniciales
-        if entorno.pos_hormiga and entorno.pos_meta:
-            g_inicio = 0
-            h_inicio = heuristica_manhattan(entorno.pos_hormiga, entorno.pos_meta)
-            f_inicio = g_inicio + h_inicio
-            self.text_area.insert(tk.END, f"\nEstado inicial:\n")
-            self.text_area.insert(tk.END, f"  g(inicio) = {g_inicio}\n")
-            self.text_area.insert(tk.END, f"  h(inicio) = {h_inicio}\n")
-            self.text_area.insert(tk.END, f"  f(inicio) = {f_inicio}\n")
+
+        if algoritmo == "beam":
+            tk.Button(frame_derecho, text="Siguiente paso", bg="#4CAF50", fg="white",
+                  font=("Arial", 12, "bold"), command=self.siguiente_paso).pack(pady=10, fill=tk.X)
+            tk.Button(frame_derecho, text="Resolver todo", bg="#2196F3", fg="white",
+                    font=("Arial", 12, "bold"), command=self.resolver_todo).pack(pady=10, fill=tk.X)
+            tk.Label(frame_derecho, text="Registro de decisiones:",
+                 bg="#ececec", font=("Arial", 12, "bold")).pack(pady=10)
+            self.text_area = scrolledtext.ScrolledText(frame_derecho, width=60, height=35, wrap=tk.WORD,
+                                                        font=("Courier", 9))
+            self.text_area.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
+            # --- Información inicial ---
+            self.text_area.insert(tk.END, "="*60 + "\n")
+            self.text_area.insert(tk.END, "INICIO DE BEAM SEARCH\n")
+            self.text_area.insert(tk.END, "="*60 + "\n")
+            self.text_area.insert(tk.END, f"Algoritmo seleccionado: {algoritmo.upper()}\n")
+            self.text_area.insert(tk.END, f"Posición inicial: {entorno.pos_hormiga}\n")
+            self.text_area.insert(tk.END, f"Posición meta: {entorno.pos_meta}\n")
+            if self.beta:
+                self.text_area.insert(tk.END, f"Beta (ancho de haz): {self.beta}\n")
+            self.text_area.insert(tk.END, f"Tamaño del mapa: {entorno.filas}x{entorno.columnas}\n")
+            self.text_area.insert(tk.END, f"Usando matriz de costos: {'Sí' if matrizCostos else 'No'}\n")
+            
+            # Calcular valores iniciales
+            if entorno.pos_hormiga and entorno.pos_meta:
+                g_inicio = 0
+                h_inicio = heuristica_manhattan(entorno.pos_hormiga, entorno.pos_meta)
+                f_inicio = g_inicio + h_inicio
+                self.text_area.insert(tk.END, f"\nEstado inicial:\n")
+                self.text_area.insert(tk.END, f"  g(inicio) = {g_inicio}\n")
+                self.text_area.insert(tk.END, f"  h(inicio) = {h_inicio}\n")
+                self.text_area.insert(tk.END, f"  f(inicio) = {f_inicio}\n")
+            
+            self.text_area.insert(tk.END, "="*60 + "\n\n")
+
         
-        self.text_area.insert(tk.END, "="*60 + "\n\n")
 
         # --- Ejecutar el algoritmo seleccionado ---
         self.ruta = []
@@ -91,8 +105,7 @@ class Simulador(tk.Tk):
             resultado = dynamic_weight_a_star(entorno)
             if resultado[0]:
                 self.ruta, self.pasos = resultado
-                self.text_area.insert(tk.END, f"✓ Ruta calculada con éxito.\n")
-                self.text_area.insert(tk.END, f"  Total de nodos en la ruta: {len(self.ruta)}\n\n")
+                self.text_area.insert(tk.END, f"Ruta calculada con éxito. Total pasos: {len(self.ruta)}\n\n")
             else:
                 messagebox.showinfo("Sin resultado", "No se encontró camino con Dynamic Weight A*.")
         else:
@@ -213,3 +226,49 @@ class Simulador(tk.Tk):
         self.paso_actual = len(self.ruta) - 1
         self.dibujar_mapa()
         messagebox.showinfo("Completado", f"¡Ruta completada! Total de pasos: {len(self.ruta)}")
+
+    def siguiente_pasoD(self):
+            if not self.ruta:
+                self.text_area.insert(tk.END, "No hay ruta para mostrar.\n")
+                return
+
+            if self.paso_actual < len(self.ruta):
+                pos_actual = self.ruta[self.paso_actual]
+                
+                # Obtener información del paso actual
+                if self.paso_actual < len(self.pasos):
+                    paso_info = self.pasos[self.paso_actual]
+                    
+                    # Mostrar información detallada
+                    self.text_area.insert(tk.END, f"\n=== Paso {self.paso_actual + 1} ===\n")
+                    self.text_area.insert(tk.END, f" Posición actual: {paso_info['pos']}\n")
+                    
+                    if 'decisiones' in paso_info:
+                        self.text_area.insert(tk.END, "\n Nodos explorados:\n")
+                        for decision in paso_info['decisiones']:
+                            pos, costo = decision
+                            self.text_area.insert(tk.END, f"  → {pos} (costo total: {costo})\n")
+                    
+                    if 'frontera' in paso_info:
+                        self.text_area.insert(tk.END, "\n Frontera antes del corte:\n")
+                        for nodo in paso_info['frontera']:
+                            self.text_area.insert(tk.END, f"  • Costo: {nodo[0]}, Camino: {nodo[1]}\n")
+
+                self.paso_actual += 1
+                self.dibujar_mapa()
+                self.text_area.see(tk.END)  # Auto-scroll
+            else:
+                self.text_area.insert(tk.END, "\n ¡Ruta completada!\n")
+    
+    def resolver_todoD(self):
+        if not self.ruta:
+            self.text_area.insert(tk.END, "No hay ruta calculada.\n")
+            return
+
+        self.text_area.insert(tk.END, "\n--- Resolviendo todo el recorrido ---\n")
+        for i, (fila, col) in enumerate(self.ruta):
+            self.text_area.insert(tk.END, f"Paso {i + 1}: {fila, col}\n")
+
+        self.text_area.insert(tk.END, " Ruta completa mostrada.\n")
+        self.paso_actual = len(self.ruta) - 1
+        self.dibujar_mapa()
